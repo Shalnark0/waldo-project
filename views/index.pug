@@ -1,0 +1,109 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Circle Click
+    link(rel="stylesheet", href="/style.css")
+    style.
+      .avatar {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        top: 0;
+      }
+      .avatar-waldo {
+        background-image: url('waldoavatar.jpg'); /* Replace with actual image path */
+        left: 0;
+      }
+      .avatar-odlaw {
+        background-image: url('odlawavatar.jpg'); /* Replace with actual image path */
+        left: 50px;
+      }
+
+      .circle {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 2px solid red;
+        z-index: 10;
+      }
+      .tick {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-image: url('tick.webp'); /* Replace with actual tick image path */
+        background-size: contain;
+        background-repeat: no-repeat;
+        top: 20px;
+        left: 15px;
+      }
+  body
+    .background-image(style="position: relative;")
+    script.
+      document.addEventListener('DOMContentLoaded', () => {
+        const characters = !{JSON.stringify(characters)}; // Characters passed from server
+
+        const body = document.querySelector("body");
+        const radius = 50; // Circle radius
+        
+        const waldoAvatar = document.createElement('div');
+        waldoAvatar.classList.add('avatar', 'avatar-waldo');
+        body.appendChild(waldoAvatar);
+
+        const odlawAvatar = document.createElement('div');
+        odlawAvatar.classList.add('avatar', 'avatar-odlaw');
+        body.appendChild(odlawAvatar);
+        
+        body.addEventListener('click', (event) => {
+          const circleX = event.clientX - radius;
+          const circleY = event.clientY - radius;
+          console.log(`${event.clientX}, ${event.clientY}`)
+          // Remove existing circle
+          const existingCircle = document.querySelector('.circle');
+          if (existingCircle) {
+            existingCircle.remove();
+            return
+          }
+    
+          // Create a new circle
+          const circle = document.createElement('div');
+          circle.classList.add('circle');
+          circle.style.left = `${circleX}px`;
+          circle.style.top = `${circleY}px`;
+          body.appendChild(circle);
+
+          // Check if any character is within the circle
+          characters.forEach(character => {
+            const [charX, charY] = character.position.split(',').map(Number);
+            if (isCharacterInCircle(circleX + radius, circleY + radius, charX, charY, radius)) {
+              console.log(`${character.name} found within the circle!`);
+              
+              const avatarFound = document.querySelector(`.avatar-${character.name.toLowerCase()}`);
+              if (avatarFound) {
+                const tick = document.createElement('div');
+                tick.classList.add('tick');
+                tick.style.zIndex=20; // Adjust position as needed
+                avatarFound.appendChild(tick);
+              }
+
+
+              // Create a tick element for the character
+              const tick = document.createElement('div');
+              tick.classList.add('tick');
+              tick.style.left = `${charX}px`; // Adjust position as needed
+              tick.style.top = `${charY}px`; // Adjust position as needed
+              body.appendChild(tick);
+            }
+          });
+        });
+
+        function isCharacterInCircle(circleX, circleY, charX, charY, radius) {
+          const dx = circleX - charX;
+          const dy = circleY - charY;
+          return dx * dx + dy * dy <= radius * radius;
+        }
+      });
